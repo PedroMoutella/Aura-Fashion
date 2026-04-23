@@ -39,11 +39,20 @@ export async function POST(req: NextRequest) {
     const data = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email: data.email } });
-    if (existing) {
-      return NextResponse.json({ error: "E-mail já cadastrado" }, { status: 409 });
-    }
 
+    // Always hash a dummy password even if the account already exists.
+    // This ensures the response time is constant regardless of whether
+    // the e-mail is registered — preventing email enumeration via timing attacks.
     const hashed = await bcrypt.hash(data.password, 12);
+
+    if (existing) {
+      // Do NOT reveal that the e-mail is already registered.
+      // Return the same generic success message to prevent enumeration.
+      return NextResponse.json(
+        { message: "Conta criada com sucesso" },
+        { status: 201 }
+      );
+    }
 
     const user = await prisma.user.create({
       data: {

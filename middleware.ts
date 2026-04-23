@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// NOTE ON RATE LIMITING:
+// This in-memory Map works correctly in long-running Node.js servers (VPS, Docker).
+// In serverless environments (Vercel, AWS Lambda), each cold start resets the Map,
+// making this limit ineffective. If you deploy to Vercel, replace this with a
+// persistent store such as Upstash Redis + @upstash/ratelimit.
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function rateLimit(ip: string, limit: number, windowMs: number): boolean {
@@ -22,7 +27,14 @@ export function middleware(req: NextRequest) {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  // CSP more restrictive in production
+
+  // HSTS — instructs browsers to always use HTTPS for this domain (2 years)
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains"
+  );
+
+  // CSP: restrictive in production, permissive in dev for Next.js HMR / Framer Motion
   const cspProduction = [
     "default-src 'self'",
     "script-src 'self'",

@@ -1,8 +1,16 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "change-this-secret-in-production"
-);
+// JWT_SECRET must be set via environment variable.
+// The app will refuse to start if it is missing — never fall back to a hardcoded value.
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error(
+    "JWT_SECRET environment variable is not defined. " +
+    "Add it to your .env file before starting the app."
+  );
+}
+
+const SECRET = new TextEncoder().encode(jwtSecret);
 
 export async function signToken(payload: { userId: number; email: string }) {
   return new SignJWT(payload)

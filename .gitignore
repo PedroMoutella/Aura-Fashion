@@ -46,3 +46,6 @@ next-env.d.ts
 *.db
 dev.db
 prisma/dev.db
+
+# IDE / AI agent config (no secrets, but no need to be public)
+.claude/
