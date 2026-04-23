@@ -67,8 +67,8 @@ prisma/                → Schema + migrations
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/PedroMoutella/teste.git
-cd teste
+git clone https://github.com/PedroMoutella/Aura-Fashion.git
+cd Aura-Fashion
 npm install
 npx prisma migrate deploy
 npm run dev
